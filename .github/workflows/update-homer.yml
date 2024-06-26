@@ -32,10 +32,11 @@ jobs:
         pnpm install
         pnpm build
         
-    - name: rm -rf resource, that will be replaced by the update
+    - name: Remove old files/directories that will be replaced by the update 
       working-directory: ./
       run: |
         rm -rf resources
+        rm workbox-*
         
     - name: Copy built Homer files to repository
       run: |
