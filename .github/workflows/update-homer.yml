@@ -1,12 +1,7 @@
 name: Update Homer
 
 on:
-  push:
-    branches:
-      - homer-test
-  pull_request:
-    branches:
-      - homer-test
+  workflow_dispatch:
 
 jobs:
   update-homer:
