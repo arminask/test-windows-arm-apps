@@ -5,6 +5,7 @@ on:
   
 permissions:
   contents: write
+  pull-requests: write
   
 jobs:
   update-homer:
@@ -12,7 +13,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Clone Homer repository
       run: git clone https://github.com/bastienwirtz/homer.git homer-latest
@@ -20,7 +21,7 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18' # Node.js version
+        node-version: '18'
 
     - name: Install pnpm
       run: npm install -g pnpm
@@ -30,17 +31,45 @@ jobs:
       run: |
         pnpm install
         pnpm build
-
+        
+    - name: rm -rf resource, that will be replaced by the update
+      working-directory: ./
+      run: |
+        rm -rf resources
+        
     - name: Copy built Homer files to repository
       run: |
-        rsync -av --exclude='logo.png' --exclude='assets/icons/' --exclude='assets/tools/' --exclude='assets/manifest.json' homer-latest/public/ ./
+        rsync -av \
+        --exclude='logo.png' \
+        --exclude='assets/additional-page.yml.dist' \
+        --exclude='assets/config-demo.yml.dist' \
+        --exclude='assets/config.yml.dist' \
+        --exclude='assets/config.yml.dist.sample-sui' \
+        --exclude='assets/custom.css.sample' \
+        --exclude='assets/tools/sample2.png' \
+        --exclude='assets/tools/sample.png' \
+        --exclude='assets/' \
+        --exclude='assets/icons/' \
+        --exclude='assets/tools/' \
+        --exclude='assets/manifest.json' \
+        homer-latest/dist/ \
+        ./
       
-    - name: Commit and push changes
+    - name: Commit changes
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
         git add . -- ':!homer-latest'
         git commit -m "Homer base update"
-        git push
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v6
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: Automated update of Homer base
+        branch: homer-base-update
+        title: "Update Homer base"
+        body: "This pull request contains automated updates of Homer dashboard files."
+        labels: automated pr
