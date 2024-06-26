@@ -54,12 +54,15 @@ jobs:
         --exclude='assets/manifest.json' \
         homer-latest/dist/ \
         ./
+        
+    - name: Remove homer-latest directory from the working directory
+      run: rm -rf homer-latest
       
     - name: Commit changes
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-        git add . -- ':!homer-latest'
+        git add .
         git commit -m "Homer base update"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
