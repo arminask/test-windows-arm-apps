@@ -2,7 +2,10 @@ name: Update Homer
 
 on:
   workflow_dispatch:
-
+  
+permissions:
+  contents: write
+  
 jobs:
   update-homer:
     runs-on: ubuntu-latest
@@ -32,6 +35,9 @@ jobs:
       run: |
         rsync -av --exclude='logo.png' --exclude='assets/icons/' --exclude='assets/tools/' --exclude='assets/manifest.json' homer-latest/public/ ./
 
+    - name: Remove cloned repository from index
+      run: git rm -r --cached homer-latest
+      
     - name: Commit and push changes
       run: |
         git config --global user.name 'github-actions[bot]'
